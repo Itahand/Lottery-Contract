@@ -64,4 +64,32 @@ describe('Lottery', () => {
     })
   })
 
+  describe('Pick winner', () => {
+
+    beforeEach(async () => {
+      const options = {value: ethers.utils.parseEther("1.0")}
+      console.log('Before playing', decimals(await ethers.provider.getBalance(player1.address)), decimals(await ethers.provider.getBalance(player2.address)))
+      await lottery.connect(player1).enter(options)
+      await lottery.connect(player2).enter(options)
+      console.log('After playing', decimals(await ethers.provider.getBalance(player1.address)), decimals(await ethers.provider.getBalance(player2.address)))
+      await lottery.connect(manager).pickWinner()
+      console.log('After Picking Winner', decimals(await ethers.provider.getBalance(player1.address)), decimals(await ethers.provider.getBalance(player2.address)))
+
+    })
+
+/*     it('Only owner can access it', async() => {
+
+********** THIS WORKS BUT CAN'T FIGURE OUT THE RIGHT WAY TO ASSERT IT TO FALSE *********************
+
+      expect(await lottery.connect(player2).pickWinner()).to.not.be.rejected
+    }) */
+
+    it('Sends the contracts balance to the winner', async () => {
+      expect(decimals(await ethers.provider.getBalance(lottery.address))).to.equal(0)
+    })
+    it('Clears all players from the contract', async () => {
+      let players = await lottery.allPlayers()
+      expect(players.length).to.equal(0)
+    })
+  })
 })
